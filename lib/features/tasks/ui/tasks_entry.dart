@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:pim_book/features/tasks/data/tasks_db_worker.dart';
 import 'package:pim_book/features/tasks/domain/tasks_model.dart';
 import 'package:provider/provider.dart';
@@ -13,9 +14,8 @@ class TasksEntry extends StatefulWidget {
 }
 
 class _TasksEntryState extends State<TasksEntry> {
+
   late final TextEditingController _descriptionTextEditingController ;
-
-
 
   _save(BuildContext context , TasksModel model)async{
     if (!widget._formKey.currentState!.validate()) return;
@@ -37,10 +37,12 @@ class _TasksEntryState extends State<TasksEntry> {
     );
   }
 
-
   @override
   void initState() {
     _descriptionTextEditingController = TextEditingController();
+    _descriptionTextEditingController.addListener(() {
+      context.read<TasksModel>().entityBeingEdited.description = _descriptionTextEditingController.text;
+    });
     super.initState();
   }
 
@@ -52,19 +54,20 @@ class _TasksEntryState extends State<TasksEntry> {
 
   @override
   Widget build(BuildContext context) {
-    TasksModel model = Provider.of<TasksModel>(context,listen: false);
-    _descriptionTextEditingController.text = model.entityBeingEdited.description;
+    TasksModel readableTasksModel = context.read<TasksModel>();
+    _descriptionTextEditingController.text = readableTasksModel.entityBeingEdited.description;
     return  Scaffold(
       bottomNavigationBar:Padding(
-        padding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
+        padding: EdgeInsets.symmetric(vertical: 5,horizontal: 10),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             TextButton(onPressed: (){
-              model.stackIndex = 0;
-            }, child: Text("cancel",style: TextStyle(fontSize: 18),)),
+              FocusScope.of(context).requestFocus(FocusNode());
+              readableTasksModel.stackIndex = 0;
+            }, child: Text("cancel",style: TextStyle(fontSize: 18,color: Theme.of(context).buttonColor),)),
+            Spacer(),
             TextButton(onPressed: (){
-              _save(context,model);
+              _save(context,readableTasksModel);
             }, child: Text("save",style: TextStyle(color: Colors.greenAccent,fontSize: 18),)),
           ],
         ),
@@ -86,20 +89,19 @@ class _TasksEntryState extends State<TasksEntry> {
                   return null;
                 },
                 onSaved: (String? value){
-                  model.entityBeingEdited.description = value;
+                  readableTasksModel.entityBeingEdited.description = value;
                 },
             ),
             ListTile(
               title: Text("Due Date"),
-              subtitle: Text(
-                  model.chosenDate == null ?
-                  "select a date" : model.chosenDate!),
-
+              subtitle: _DueDateTile(),
               trailing: IconButton(
                 icon: Icon(Icons.edit),
                 onPressed: ()async{
-                  String chosenDate = await utils.selectDate(context, model, model.entityBeingEdited.dueDate);
-                  model.entityBeingEdited.dueDate = chosenDate;
+                  FocusScope.of(context).requestFocus(FocusNode());
+                  String chosenDate = await utils.selectDate(context, readableTasksModel, readableTasksModel.entityBeingEdited.dueDate);
+                  readableTasksModel.entityBeingEdited.dueDate = chosenDate;
+                  readableTasksModel.chosenDate = DateFormat.yMMMMd("en_US").format(utils.dateTimeFromString(chosenDate));
                 },
               ),
             )
@@ -110,3 +112,19 @@ class _TasksEntryState extends State<TasksEntry> {
     );
   }
 }
+
+
+class _DueDateTile extends StatelessWidget {
+  _DueDateTile({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+
+    return  Text(
+        context.watch<TasksModel>().chosenDate == null ?
+        "select a date" : context.watch<TasksModel>().chosenDate!
+    );
+  }
+
+}
+

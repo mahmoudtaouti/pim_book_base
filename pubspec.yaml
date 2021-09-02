@@ -26,9 +26,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # A Widget that passes a Reactive Model to all of it's children
-  scoped_model: ^2.0.0-nullsafety.0
-
   # For SQLite, a self-contained, high-reliability, embedded, SQL database engine.
   sqflite: ^2.0.0+4
 
@@ -44,15 +41,9 @@ dependencies:
   # date and number formatting and parsing, bi-directional text, and other internationalization issues.
   intl: ^0.17.0
 
-  # for selecting images from the Android and iOS image library
-  image_picker: ^0.8.4
-
   # Calendar widget for flutter that is swipeable.
   # This widget can help you build customizable calendar with scrollable actions.
   flutter_calendar_carousel: ^2.0.3
-  flutter_clean_calendar: ^1.1.0
-
-
 
   provider: ^6.0.0
 

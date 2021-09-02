@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:scoped_model/scoped_model.dart';
 
-class BaseModel extends ChangeNotifier{
+class BaseModel extends ChangeNotifier {
 
   int _stackIndex = 0;
   List _entityList = [];

@@ -1,8 +1,7 @@
 import 'package:pim_book/core/base_model.dart';
+import 'package:pim_book/features/appointments/data/appointments_db_worker.dart';
 
 import 'appointment.dart';
-
-AppointmentsModel appointmentsModel = AppointmentsModel();
 
 class AppointmentsModel extends BaseModel{
 
@@ -10,6 +9,7 @@ class AppointmentsModel extends BaseModel{
 
   AppointmentsModel(){
     entityBeingEdited = Appointment();
+    loadData("appointments", AppointmentsDBWorker.instance);
   }
 
   set apptTime(String? value) {

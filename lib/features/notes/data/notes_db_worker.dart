@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:path/path.dart';
 import 'package:pim_book/features/notes/domain/note.dart';
 import 'package:sqflite/sqflite.dart';
@@ -19,7 +21,8 @@ class NotesDBWorker{
   }
 
   Future<Database> init() async{
-    String path = join(utils.docsDir!.path,"notes.db");
+    Directory docsDir = await utils.Utils.docsDir;
+    String path = join(docsDir.path,"notes.db");
     Database db = await openDatabase(path,
         version: 1,
         onOpen: (db){},
@@ -35,7 +38,7 @@ class NotesDBWorker{
     );
     return db;
   }
-  
+
   Future create(Note inNote)async{
     Database db = await database;
     var val = await db.rawQuery("SELECT MAX(id) + 1 AS id FROM notes");

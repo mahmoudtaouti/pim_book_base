@@ -1,8 +1,6 @@
 import 'dart:io';
 
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:pim_book/features/tasks/data/tasks_helper.dart';
 import 'package:pim_book/features/tasks/domain/task.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:pim_book/core/utils.dart' as utils;
@@ -17,6 +15,7 @@ class TasksDBWorker{
   static final instance = TasksDBWorker._();
 
   Database? _db;
+
   Future get database async {
     if (_db == null) {
       _db = await init();
@@ -25,7 +24,7 @@ class TasksDBWorker{
   }
 
   Future<Database> init() async{
-    Directory docsDir = await getApplicationDocumentsDirectory();
+    Directory docsDir = await utils.Utils.docsDir;
     String path = join(docsDir.path,"tasks.db");
     Database db = await openDatabase(path,
         version: 1,
@@ -64,7 +63,7 @@ class TasksDBWorker{
   }
 
   Future<List> getAll()async{
-    Database db =await database;
+    Database db = await database;
     var recs = await db.query("tasks");
     var list = recs.isNotEmpty ? recs.map((e) => Task.fromMap(e)).toList() : [];
     return list;

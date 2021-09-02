@@ -6,7 +6,23 @@ import 'package:pim_book/features/appointments/domain/appointments_model.dart';
 import 'base_model.dart';
 
 
-Directory? docsDir;
+
+
+
+class Utils{
+
+  Utils._();
+  static Directory? _docsDir;
+
+  static Future<Directory> get docsDir async {
+    if (_docsDir == null) {
+      _docsDir =  await getApplicationDocumentsDirectory();
+    }
+    return _docsDir!;
+  }
+
+}
+
 
 
 
@@ -24,7 +40,7 @@ Future selectDate(BuildContext inContext ,BaseModel inModel,String? inDateString
           lastDate: DateTime(2060)
       );
   if (picked != null) {
-    inModel.chosenDate = DateFormat.yMMMMd("en_US").format(picked.toLocal());
+    //inModel.chosenDate = DateFormat.yMMMMd("en_US").format(picked.toLocal());
     return "${picked.year},${picked.month},${picked.day}";
   }
 

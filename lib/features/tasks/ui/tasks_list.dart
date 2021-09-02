@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
@@ -7,11 +8,15 @@ import 'package:pim_book/features/tasks/domain/tasks_model.dart';
 import 'package:pim_book/core/utils.dart' as utils;
 import 'package:provider/provider.dart';
 
-class TasksList extends StatelessWidget {
-  TasksList({Key? key}) : super(key: key);
+class TasksList extends StatefulWidget {
+  @override
+  _TasksListState createState() => _TasksListState();
+}
 
+class _TasksListState extends State<TasksList> {
   Future _deleteTask(BuildContext context,Task task){
     return showDialog(context: context, builder: (BuildContext inContext){
+
       return AlertDialog(
         title: Text("Delete"),
         content: Text("Are you sure you wont delete ${task.description}"),
@@ -32,7 +37,7 @@ class TasksList extends StatelessWidget {
                         content: Text("Task deleted",style: TextStyle(color: Colors.redAccent),)
                     )
                 );
-                Provider.of<TasksModel>(context).loadData("tasks", TasksDBWorker.instance);
+               context.read<TasksModel>().loadData("tasks", TasksDBWorker.instance);
               },
               child: Text("delete")
           ),
@@ -41,23 +46,29 @@ class TasksList extends StatelessWidget {
     });
   }
 
+
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    TasksModel model =  Provider.of<TasksModel>(context);
-    model.loadData("tasks", TasksDBWorker.instance);
+    TasksModel readableTasksModel = Provider.of<TasksModel>(context,listen: false);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          model.entityBeingEdited = Task();
-          model.stackIndex = 1;
+          readableTasksModel.entityBeingEdited = Task();
+          readableTasksModel.stackIndex = 1;
         },
         child: Icon(Icons.add),
       ),
       body: ListView.builder(
-          padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
-          itemCount: model.data.length,
+          padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
+          itemCount: context.watch<TasksModel>().data.length,
           itemBuilder: (buildContext,index){
-            Task task = model.data[index];
+            Task task = context.watch<TasksModel>().data[index];
             String dueDate = "";
             if (task.dueDate != null) {
               DateTime date = utils.dateTimeFromString(task.dueDate!);
@@ -72,13 +83,13 @@ class TasksList extends StatelessWidget {
                   foregroundColor: Colors.lightBlueAccent,
                   icon: Icons.edit,
                   onTap: (){
-                    model.entityBeingEdited = task;
-                    if (model.entityBeingEdited.dueDate == null)   {
-                      model.chosenDate = null;
+                    readableTasksModel.entityBeingEdited = task;
+                    if (readableTasksModel.entityBeingEdited.dueDate == null)   {
+                      readableTasksModel.chosenDate = null;
                     }  else{
-                      model.chosenDate = model.entityBeingEdited.dueDate;
+                      readableTasksModel.chosenDate = readableTasksModel.entityBeingEdited.dueDate;
                     }
-                    model.stackIndex = 1;
+                    readableTasksModel.stackIndex = 1;
                   },
                 )
               ],
@@ -91,26 +102,36 @@ class TasksList extends StatelessWidget {
                   onTap: ()=> _deleteTask(context,task),
                 )
               ],
-              child: ListTile(
-                leading: Checkbox(
-                  onChanged: (bool? value) async{
-                    task.completed = value.toString();
-                    await TasksDBWorker.instance.update(task);
-                    model.notifyListeners();
-                  },
-                  value: task.completed == "true" ? true : false,),
-                title: Text("${task.description}",style: task.completed =="true" ?
-                TextStyle(
-                    decoration: TextDecoration.lineThrough
-                ) :
-                TextStyle(
-                    decoration: TextDecoration.none
-                ),
-                ),
-                subtitle: Text("$dueDate"),
+              child: Stack(
+                children: [
+                  ListTile(
+                    enabled: task.completed =="true" ? false : true,
+                    leading: Checkbox(
+                      onChanged: (bool? value) async{
+                        task.completed = value.toString();
+                        await TasksDBWorker.instance.update(task);
+                        readableTasksModel.notifyListeners();
+                      },
+                      value: task.completed == "true" ? true : false,),
+                    title: Text("${task.description}",style: task.completed =="true" ?
+                    TextStyle(
+                        decoration: TextDecoration.lineThrough
+                    ) :
+                    TextStyle(
+                        decoration: TextDecoration.none
+                    ),
+                    ),
+                    subtitle: Text("$dueDate"),
+                  ),
+                  Positioned(
+                    bottom: 0.0,
+                    left: 0.0,
+                    right: 0.0,
+                    child: Divider(height: 0,thickness: 1,indent: 20,endIndent: 20,color: task.completed =="true" ? Colors.white.withOpacity(0.0):Colors.amber,),)
+                ],
               ),
             );
-          }),
-    );
+          },
+    ));
   }
 }

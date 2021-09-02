@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:path/path.dart';
 import 'package:pim_book/features/appointments/domain/appointment.dart';
 import 'package:sqflite/sqflite.dart';
@@ -19,7 +21,8 @@ class AppointmentsDBWorker{
   }
 
   Future<Database> init() async{
-    String path = join(utils.docsDir!.path,"appointments.db");
+    Directory docsDir = await utils.Utils.docsDir;
+    String path = join(docsDir.path,"appointments.db");
     Database db = await openDatabase(path,
         version: 1,
         onOpen: (db){},

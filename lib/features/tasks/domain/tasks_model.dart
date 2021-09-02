@@ -8,8 +8,8 @@ class TasksModel extends BaseModel{
 
   TasksModel(){
     entityBeingEdited = Task();
+    loadData("tasks", TasksDBWorker.instance);
   }
-
 
  @override
   void notifyListeners() {

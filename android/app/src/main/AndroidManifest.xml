@@ -1,5 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.tm.pim_book">
+
+
+
    <application
         android:label="pim_book"
         android:icon="@mipmap/ic_launcher">
