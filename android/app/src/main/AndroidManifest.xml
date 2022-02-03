@@ -4,7 +4,7 @@
 
 
    <application
-        android:label="pim_book"
+        android:label="PIM Book"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
