@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pim_book/features/appointments/controller/appointments_controller.dart';
 import 'package:pim_book/features/appointments/domain/appointments_model.dart';
 import 'base_model.dart';
 
@@ -25,11 +26,11 @@ class Utils{
 
 
 
-
-Future selectDate(BuildContext inContext ,BaseModel inModel,String? inDateString) async {
+//TODO initDate parameters
+Future selectDate(BuildContext inContext ,AppointmentsController ctrl) async {
   DateTime initDate = DateTime.now();
-  if (inDateString != null) {
-    initDate = dateTimeFromString(inDateString);
+  if (ctrl.chosenDate != null) {
+    initDate = dateTimeFromString(ctrl.chosenDate!);
   }
 
   DateTime? picked = await
@@ -46,15 +47,15 @@ Future selectDate(BuildContext inContext ,BaseModel inModel,String? inDateString
 
 }
 
-Future selectTime(BuildContext context,AppointmentsModel model) async{
+Future selectTime(BuildContext context,AppointmentsController ctrl) async{
   TimeOfDay initialTime = TimeOfDay.now();
-  if (model.entityBeingEdited.apptTime != null) {
-    initialTime = timeOfDayFromString(model.entityBeingEdited.apptTime!);
+  if (ctrl.entityBeingEdited.value.apptTime != null) {
+    initialTime = timeOfDayFromString(ctrl.entityBeingEdited.value.apptTime!);
   }
   TimeOfDay? picked = await showTimePicker(context: context, initialTime: initialTime);
   if (picked != null) {
-    model.entityBeingEdited.apptTime = "${picked.hour},${picked.minute}";
-    model.apptTime = picked.format(context);
+    ctrl.entityBeingEdited.value.apptTime = "${picked.hour},${picked.minute}";
+    ctrl.apptTime = picked.format(context);
     return "${picked.hour},${picked.minute}";
   }
 }

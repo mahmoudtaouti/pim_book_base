@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pim_book/features/appointments/controller/appointments_controller.dart';
 import 'package:pim_book/features/appointments/data/appointments_db_worker.dart';
 import 'package:pim_book/features/appointments/domain/appointment.dart';
 import 'package:pim_book/features/appointments/domain/appointments_model.dart';
@@ -6,7 +7,7 @@ import 'package:pim_book/core/utils.dart' as utils;
 import 'package:provider/provider.dart';
 
 class AppointmentsEntry extends StatefulWidget {
-  AppointmentsEntry(){
+  AppointmentsEntry(this.appointmentsCtrl){
     // _titleTextEditingController.addListener(() {
     //   appointmentsModel.entityBeingEdited.title =
     //       _titleTextEditingController.text;});
@@ -15,6 +16,7 @@ class AppointmentsEntry extends StatefulWidget {
     //       _descriptionTextEditingController.text;});
   }
 
+  final AppointmentsController appointmentsCtrl;
   @override
   _AppointmentsEntryState createState() => _AppointmentsEntryState();
 }
@@ -27,16 +29,16 @@ class _AppointmentsEntryState extends State<AppointmentsEntry> {
 
   final GlobalKey<FormState> _formKey = GlobalKey();
 
-  _save(BuildContext context , AppointmentsModel model)async{
+  _save(BuildContext context )async{
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
-    if (model.entityBeingEdited.id == null)  {
-      await AppointmentsDBWorker.instance.create(model.entityBeingEdited);
+    if (widget.appointmentsCtrl.entityBeingEdited.value.id == null)  {
+      await AppointmentsDBWorker.instance.create(widget.appointmentsCtrl.entityBeingEdited.value);
     } else{
-      await AppointmentsDBWorker.instance.update(model.entityBeingEdited);
+      await AppointmentsDBWorker.instance.update(widget.appointmentsCtrl.entityBeingEdited.value);
     }
-    model.loadData("appointments", AppointmentsDBWorker.instance);
-    model.stackIndex = 0;
+    widget.appointmentsCtrl.loadData("appointments", AppointmentsDBWorker.instance);
+    widget.appointmentsCtrl.stackIndex = 0;
     ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             duration: Duration(seconds: 2),
@@ -45,7 +47,7 @@ class _AppointmentsEntryState extends State<AppointmentsEntry> {
             )
         )
     );
-    print("saved ${model.entityBeingEdited}");
+    print("saved ${widget.appointmentsCtrl.entityBeingEdited}");
   }
 
 
@@ -65,11 +67,11 @@ class _AppointmentsEntryState extends State<AppointmentsEntry> {
 
   @override
   Widget build(BuildContext context) {
-    AppointmentsModel appointmentsModel=  Provider.of<AppointmentsModel>(context,listen: false);
 
 
-    _titleTextEditingController.text = appointmentsModel.entityBeingEdited.title;
-    _descriptionTextEditingController.text = appointmentsModel.entityBeingEdited.description;
+
+    _titleTextEditingController.text = widget.appointmentsCtrl.entityBeingEdited.value.title!;
+    _descriptionTextEditingController.text = widget.appointmentsCtrl.entityBeingEdited.value.description!;
 
     return Scaffold(
       bottomNavigationBar:Padding(
@@ -79,10 +81,10 @@ class _AppointmentsEntryState extends State<AppointmentsEntry> {
           children: [
             TextButton(onPressed: (){
               FocusScope.of(context).requestFocus(FocusNode());
-              appointmentsModel.stackIndex = 0;
+              widget.appointmentsCtrl.stackIndex = 0; //todo need AppointmentsController()
             }, child: Text("cancel",style: TextStyle(fontSize: 18),)),
             TextButton(onPressed: (){
-              _save(context,appointmentsModel);
+              _save(context);
             }, child: Text("save",style: TextStyle(color: Colors.greenAccent,fontSize: 18),)),
           ],
         ),
@@ -94,7 +96,7 @@ class _AppointmentsEntryState extends State<AppointmentsEntry> {
           children: [
             TextFormField(
                 onSaved: (String? value){
-                  appointmentsModel.entityBeingEdited.title = value;
+                  widget.appointmentsCtrl.entityBeingEdited.value.title = value;
                 },
                 decoration: InputDecoration(
                     hintText: "Meeting : alphaTeam",
@@ -110,7 +112,7 @@ class _AppointmentsEntryState extends State<AppointmentsEntry> {
 
             TextFormField(
                 onSaved: (String? value){
-                  appointmentsModel.entityBeingEdited.description = value;
+                  widget.appointmentsCtrl.entityBeingEdited.value.description = value;
                 },
                 keyboardType: TextInputType.multiline,
                 maxLines: 10,
@@ -125,15 +127,15 @@ class _AppointmentsEntryState extends State<AppointmentsEntry> {
               leading: Icon(Icons.date_range),
               title: Text("Date"),
               subtitle: Text(
-                  Provider.of<AppointmentsModel>(context).chosenDate == null ?
-                  "" : Provider.of<AppointmentsModel>(context).chosenDate!),
+                  widget.appointmentsCtrl.chosenDate == null ?
+                  "" : widget.appointmentsCtrl.chosenDate!),
 
               trailing: IconButton(
                 icon: Icon(Icons.edit),
                 onPressed: ()async{
                   FocusScope.of(context).requestFocus(FocusNode());
-                  String chosenDate = await utils.selectDate(context, appointmentsModel, appointmentsModel.entityBeingEdited.apptDate);
-                  appointmentsModel.entityBeingEdited.apptDate = chosenDate;
+                  String chosenDate = await utils.selectDate(context,widget.appointmentsCtrl);
+                  widget.appointmentsCtrl.entityBeingEdited.value.apptDate = chosenDate;
 
                 },
               ),
@@ -151,8 +153,8 @@ class _AppointmentsEntryState extends State<AppointmentsEntry> {
                 icon: Icon(Icons.edit),
                 onPressed: ()async{
                   FocusScope.of(context).requestFocus(FocusNode());
-                  String chosenTime = await utils.selectTime(context, appointmentsModel);
-                  (appointmentsModel.entityBeingEdited as Appointment).apptTime = chosenTime;
+                  String chosenTime = await utils.selectTime(context,widget.appointmentsCtrl);
+                  (widget.appointmentsCtrl.entityBeingEdited as Appointment).apptTime = chosenTime;
                 },
               ),
             ),

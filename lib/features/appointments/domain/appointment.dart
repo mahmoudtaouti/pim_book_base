@@ -6,7 +6,9 @@ class Appointment{
   String? apptTime;
 
   Appointment();
+
   Appointment.set(this.id,this.title,this.description,this.apptDate,this.apptTime);
+
   factory Appointment.fromMap(Map<String,dynamic> map){
     return Appointment.set(
         map["id"],

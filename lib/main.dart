@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:pim_book/core/theme/pim_theme.dart';
 import 'package:pim_book/features/appointments/domain/appointments_model.dart';
 import 'package:pim_book/features/tasks/domain/tasks_model.dart';
@@ -30,14 +31,11 @@ class PIMBook extends StatefulWidget {
 
 class _PIMBookState extends State<PIMBook> {
 
-
   int _currentIndex = 0;
 
   @override
   void initState() {
-    utils.Utils.docsDir;
     currentThemeMode.addListener(() {
-
       setState(() {});
     });
     super.initState();
@@ -51,7 +49,7 @@ class _PIMBookState extends State<PIMBook> {
         ChangeNotifierProvider(create: (BuildContext context) => NotesModel(),),
         ChangeNotifierProvider(create: (BuildContext context) => AppointmentsModel(),),
       ],
-      child:  MaterialApp(
+      child:  GetMaterialApp(
         title: "PIMBook",
         theme : PIMTheme.lightTheme,
         darkTheme: PIMTheme.darkTheme,

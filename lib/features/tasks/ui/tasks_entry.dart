@@ -99,9 +99,10 @@ class _TasksEntryState extends State<TasksEntry> {
                 icon: Icon(Icons.edit),
                 onPressed: ()async{
                   FocusScope.of(context).requestFocus(FocusNode());
-                  String chosenDate = await utils.selectDate(context, readableTasksModel, readableTasksModel.entityBeingEdited.dueDate);
-                  readableTasksModel.entityBeingEdited.dueDate = chosenDate;
-                  readableTasksModel.chosenDate = DateFormat.yMMMMd("en_US").format(utils.dateTimeFromString(chosenDate));
+                  //TODO chosenDate not working because parammeters changed in utils.selectDate
+                 // String chosenDate = await utils.selectDate(context, readableTasksModel, readableTasksModel.entityBeingEdited.dueDate);
+                  //readableTasksModel.entityBeingEdited.dueDate = chosenDate;
+                  //readableTasksModel.chosenDate = DateFormat.yMMMMd("en_US").format(utils.dateTimeFromString(chosenDate));
                 },
               ),
             )
