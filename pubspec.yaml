@@ -1,5 +1,5 @@
 name: pim_book
-description: a personal information manager application, that stores some basic information (appointments, contacts, notes, and tasks).
+description: a personal information manager application, that stores some basic information (events, contacts, notes, and tasks).
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -28,10 +28,14 @@ dependencies:
 
   # For SQLite, a self-contained, high-reliability, embedded, SQL database engine.
   sqflite: ^2.0.0+4
+  encrypt: ^5.0.1
+  path: ^1.7.0
+  permission_handler: ^10.0.0
 
   # For getting commonly
   # used locations on host platform file systems, such as the temp and app data directories.
-  path_provider: ^2.0.2
+  path_provider: ^2.0.9
+  path_provider_android: ^2.0.12
 
   # A Flutter implementation of slidable list item
   # with directional slide actions that can be dismissed.
@@ -47,10 +51,18 @@ dependencies:
 
   provider: ^6.0.0
   get: ^4.6.1
+  dartz: ^0.10.1
+  freezed: ^1.1.1
+
+  syncfusion_flutter_calendar: ^19.4.56
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.3
+
+
+dev_dependencies:
+  build_runner: ^2.1.7
 
 
 # For information on the generic Dart part of this file, see the

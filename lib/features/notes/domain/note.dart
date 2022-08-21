@@ -1,18 +1,20 @@
 class Note {
 
    int? id;
-   String? title = "";
-   String? content = "";
-   String? color;
+   String title;
+   String content ;
+   String color;
 
   @override
   String toString() => "{\nid : $id,\ntitle : $title,\ncontent : $content,\ncolor : $color\n}";
 
-  Note();
-  Note.set(this.id, this.title, this.content, this.color);
+
+  //TODO : add valueObject so we can verify if the title not empty
+  Note.set(this.title,this.content,this.color);
+  Note.setWithId(this.id, this.title, this.content, this.color);
   
   factory Note.fromMap(Map<String,dynamic> inMap){
-    return Note.set(
+    return Note.setWithId(
         inMap["id"],
         inMap["title"],
         inMap["content"],

@@ -1,44 +1,24 @@
-import 'dart:io';
-
-import 'package:path/path.dart';
+import 'package:pim_book/core/Database.dart';
+import 'package:pim_book/features/notes/domain/i_notes_facade.dart';
 import 'package:pim_book/features/notes/domain/note.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:pim_book/core/utils.dart' as utils;
 
-class NotesDBWorker{
 
-  NotesDBWorker._(){
+class NotesDBWorker implements INotesFacade {
+
+  NotesDBWorker(){
     database;
   }
-  static final instance = NotesDBWorker._();
 
-  Database? _db;
+  Database? _database;
+
   Future get database async {
-    if (_db == null) {
-      _db = await init();
-    }
-    return _db;
+    _database = await PIM_DB.instance.database;
+    return _database;
   }
 
-  Future<Database> init() async{
-    Directory docsDir = await utils.Utils.docsDir;
-    String path = join(docsDir.path,"notes.db");
-    Database db = await openDatabase(path,
-        version: 1,
-        onOpen: (db){},
-      onCreate: (Database inDB,int inVersion)async{
-      await inDB.execute("CREATE TABLE IF NOT EXISTS notes("
-        "id INTEGER PRIMARY KEY,"
-        "title TEXT,"
-        "content TEXT,"
-        "color TEXT"
-        ")"
-      );
-      }
-    );
-    return db;
-  }
 
+  @override
   Future create(Note inNote)async{
     Database db = await database;
     var val = await db.rawQuery("SELECT MAX(id) + 1 AS id FROM notes");
@@ -53,26 +33,32 @@ class NotesDBWorker{
 
   }
 
-  Future<Note> get(int inId)async{
+  @override
+  Future<Note> getNote(int inId)async{
     Database db = await database;
     var rec = await db.query("notes",where: "id = ?",whereArgs: [inId]);
     return Note.fromMap(rec.first);
   }
 
+  @override
   Future<List> getAll()async{
-    Database db =await database;
+    Database db = await database;
     var recs = await db.query("notes");
-    var list = recs.isNotEmpty ? recs.map((e) => Note.fromMap(e)).toList() : [];
-    return list;
+    return  recs.isNotEmpty ? recs.map((e) => Note.fromMap(e)).toList() : [];
   }
 
+  @override
   Future update(Note inNote)async{
     Database db = await database;
     return await db.update("notes", Note.toMap(inNote),where: "id = ?",whereArgs: [inNote.id]);
   }
 
+  @override
   Future delete(int inId)async{
     Database db = await database;
     return await db.delete("notes",where: "id = ?",whereArgs: [inId]);
   }
+
+
+
 }

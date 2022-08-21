@@ -1,47 +1,30 @@
 import 'dart:io';
 
 import 'package:path/path.dart';
+import 'package:pim_book/features/tasks/domain/i_tasks_facade.dart';
 import 'package:pim_book/features/tasks/domain/task.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:pim_book/core/utils.dart' as utils;
 
+import '../../../core/Database.dart';
 
 
-class TasksDBWorker{
 
-  TasksDBWorker._(){
+class TasksDBWorker implements ITasksFacade{
+
+  TasksDBWorker(){
     database;
   }
-  static final instance = TasksDBWorker._();
 
-  Database? _db;
+  Database? _database;
 
   Future get database async {
-    if (_db == null) {
-      _db = await init();
-    }
-    return _db;
+    _database = await PIM_DB.instance.database;
+    return _database;
   }
 
-  Future<Database> init() async{
-    Directory docsDir = await utils.Utils.docsDir;
-    String path = join(docsDir.path,"tasks.db");
-    Database db = await openDatabase(path,
-        version: 1,
-        onOpen: (db){},
-        onCreate: (Database inDB,int inVersion)async{
-          await inDB.execute("CREATE TABLE IF NOT EXISTS tasks("
-              "id INTEGER PRIMARY KEY,"
-              "description TEXT,"
-              "dueDate TEXT,"
-              "completed TEXT"
-              ")"
-          );
-        }
-    );
-    return db;
-  }
 
+  @override
   Future create(Task inTask)async{
     Database db = await database;
     var val = await db.rawQuery("SELECT MAX(id) + 1 AS id FROM tasks");
@@ -56,12 +39,14 @@ class TasksDBWorker{
 
   }
 
-  Future<Task> get(int inId)async{
+  @override
+  Future<Task> getTask(int inId)async{
     Database db = await database;
     var rec = await db.query("tasks",where: "id = ?",whereArgs: [inId]);
     return Task.fromMap(rec.first);
   }
 
+  @override
   Future<List> getAll()async{
     Database db = await database;
     var recs = await db.query("tasks");
@@ -69,11 +54,13 @@ class TasksDBWorker{
     return list;
   }
 
+  @override
   Future update(Task inTask)async{
     Database db = await database;
     return await db.update("tasks", Task.toMap(inTask),where: "id = ?",whereArgs: [inTask.id]);
   }
 
+  @override
   Future delete(int inId)async{
     Database db = await database;
     return await db.delete("tasks",where: "id = ?",whereArgs: [inId]);

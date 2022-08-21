@@ -1,31 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:pim_book/features/notes/data/notes_db_worker.dart';
-import 'package:pim_book/features/notes/domain/notes_model.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
+import 'package:pim_book/features/notes/application/notes_controller.dart';
+import 'package:pim_book/features/notes/application/notes_entry_controller.dart';
+import 'package:pim_book/features/notes/domain/note.dart';
 
 
-class NotesEntry extends StatefulWidget {
-  @override
-  _NotesEntryState createState() => _NotesEntryState();
-}
+class NotesEntry extends StatelessWidget {
 
-class _NotesEntryState extends State<NotesEntry> {
 
-  late TextEditingController _titleTextEditingController;
-  late TextEditingController _contentTextEditingController;
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late final NotesEntryController entryCtrl;
+
+  NotesEntry(Note inNote){
+    entryCtrl = Get.put(NotesEntryController(note : inNote));
+  }
 
   /// save note to database and show snack bar
   /// and back to the list screen
-  _save(BuildContext context,NotesModel model)async{
-    if (!_formKey.currentState!.validate()) return;
-    if (model.entityBeingEdited.id == null)  {
-      await NotesDBWorker.instance.create(model.entityBeingEdited);
-    } else{
-      await NotesDBWorker.instance.update(model.entityBeingEdited);
-    }
-    model.loadData("notes", NotesDBWorker.instance);
-    model.stackIndex = 0;
+  _save(BuildContext context)async{
+    if (!entryCtrl.formKey.currentState!.validate()) return;
+    entryCtrl.onSaveNote();
+    Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             duration: Duration(seconds: 2),
@@ -37,31 +31,8 @@ class _NotesEntryState extends State<NotesEntry> {
   }
 
 
-
-  @override
-  void initState() {
-    /// add listener to textField when ever the data changes
-    /// we pass it to entity being edited
-    _titleTextEditingController = TextEditingController();
-    _contentTextEditingController= TextEditingController();
-    _titleTextEditingController .addListener(() {
-      Provider.of<NotesModel>(context,listen: false).entityBeingEdited.title = _titleTextEditingController.text;
-    });
-    _contentTextEditingController .addListener(() {
-      Provider.of<NotesModel>(context,listen: false).entityBeingEdited.content = _contentTextEditingController.text;
-    });
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
-    /// case we entity being edited exist and we just wont to update it
-    /// if entity being edited is a new note the title and content length is 0
-    _titleTextEditingController.text = Provider.of<NotesModel>(context).entityBeingEdited.title;
-    _contentTextEditingController.text = Provider.of<NotesModel>(context).entityBeingEdited.content;
-
-    NotesModel notesModel = Provider.of<NotesModel>(context,listen: false);
-
 
     return Scaffold(
       bottomNavigationBar: Padding(
@@ -71,20 +42,20 @@ class _NotesEntryState extends State<NotesEntry> {
           children: [
             TextButton(onPressed: (){
               FocusScope.of(context).requestFocus(FocusNode());
-              notesModel.stackIndex = 0;
+              Navigator.pop(context);
             }, child: Text("cancel",style: TextStyle(fontSize: 18),)),
             TextButton(onPressed: (){
-              _save(context,notesModel);
+              _save(context);
             }, child: Text("save",style: TextStyle(color: Colors.greenAccent,fontSize: 18),)),
           ],
         ),
       ),
       body: Form(
-        key: _formKey,
+        key: entryCtrl.formKey,
         child: ListView(
           children: [
             TextFormField(
-              controller: _titleTextEditingController,
+              controller: entryCtrl.titleTextEditingController,
               decoration: InputDecoration(
                 hintText: "title",
                 prefixIcon: Icon(Icons.title),
@@ -97,9 +68,9 @@ class _NotesEntryState extends State<NotesEntry> {
               },
             ),
             TextFormField(
-              controller: _contentTextEditingController,
+              controller: entryCtrl.contentTextEditingController,
               keyboardType: TextInputType.multiline,
-              maxLines: 10,
+              maxLines: 20,
               decoration: InputDecoration(
                 hintText: "content",
                 prefixIcon: Icon(Icons.content_paste),
@@ -108,24 +79,7 @@ class _NotesEntryState extends State<NotesEntry> {
                 return null;
               },
             ),
-            ListTile(
-              leading: Icon(Icons.color_lens,),
-              title: Row(children: [
-                _ColorTent(color: Colors.redAccent, colorTxt: "red"),
-                Spacer(),
-                _ColorTent(color: Colors.greenAccent, colorTxt: "green"),
-                Spacer(),
-                _ColorTent(color: Colors.blueAccent, colorTxt: "blue"),
-                Spacer(),
-                _ColorTent(color: Colors.yellowAccent, colorTxt: "yellow"),
-                Spacer(),
-                _ColorTent(color: Colors.grey, colorTxt: "grey"),
-                Spacer(),
-                _ColorTent(color: Colors.indigo, colorTxt: "purple"),
-              ],
-
-              ),
-            )
+           ColorTentList(entryCtrl: entryCtrl,),
           ],
         ),
       ),
@@ -134,27 +88,56 @@ class _NotesEntryState extends State<NotesEntry> {
 }
 
 
+class ColorTentList extends StatelessWidget {
+  const ColorTentList({Key? key,required this.entryCtrl}) : super(key: key);
+  final NotesEntryController entryCtrl;
+  @override
+  Widget build(BuildContext context) {
+    return  ListTile(
+      leading: Icon(Icons.color_lens,),
+      title: Row(children: [
+        _ColorTent(color: Colors.redAccent, colorTxt: "red",entryCtrl: entryCtrl,),
+        Spacer(),
+        _ColorTent(color: Colors.greenAccent, colorTxt: "green",entryCtrl: entryCtrl,),
+        Spacer(),
+        _ColorTent(color: Colors.blueAccent, colorTxt: "blue",entryCtrl: entryCtrl,),
+        Spacer(),
+        _ColorTent(color: Colors.yellowAccent, colorTxt: "yellow",entryCtrl: entryCtrl,),
+        Spacer(),
+        _ColorTent(color: Colors.grey, colorTxt: "grey",entryCtrl: entryCtrl,),
+        Spacer(),
+        _ColorTent(color: Colors.indigo, colorTxt: "purple",entryCtrl: entryCtrl,),
+      ],
+
+      ),
+    );
+  }
+}
+
+
+
 class _ColorTent extends StatelessWidget {
-  const _ColorTent({Key? key, required this.color, required this.colorTxt})
+  const _ColorTent({Key? key, required this.color, required this.colorTxt,required this.entryCtrl})
       : super(key: key);
 
-
+  final NotesEntryController entryCtrl;
   final Color color;
   final String colorTxt;
   @override
   Widget build(BuildContext context) {
-    NotesModel notesModel = Provider.of<NotesModel>(context,listen: false);
     return GestureDetector(
       onTap: (){
-        notesModel.entityBeingEdited.color = colorTxt;
-        notesModel.color = colorTxt;
+        entryCtrl.onSelectColor(colorTxt);
       },
-      child: Container(
-        height: 30,width: 30,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5.0),
-          color: notesModel.color == colorTxt ? color : color.withOpacity(0.4),
-        ),
+      child: Obx(() {
+          return Container(
+            height: 41,width: 41,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20.0),
+              color: entryCtrl.color.value == colorTxt ? color : color.withOpacity(0.3),
+            ),
+          );
+        }
       ),
     );
   }

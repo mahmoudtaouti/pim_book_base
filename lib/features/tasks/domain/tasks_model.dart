@@ -8,7 +8,7 @@ class TasksModel extends BaseModel{
 
   TasksModel(){
     entityBeingEdited = Task();
-    loadData("tasks", TasksDBWorker.instance);
+    loadData("tasks", TasksDBWorker());
   }
 
  @override

@@ -1,14 +1,15 @@
 class Task {
   int? id;
-  String? description ="";
+  String description = "";
   String? dueDate;
-  String? completed = "false";
+  String completed = "false";
 
   Task();
+  Task.setWithId(this.id, this.description, this.dueDate, this.completed);
   Task.set(this.id, this.description, this.dueDate, this.completed);
 
   factory Task.fromMap(Map<String,dynamic> inMap){
-    return Task.set(
+    return Task.setWithId(
         inMap["id"],
         inMap["description"],
         inMap["dueDate"],
