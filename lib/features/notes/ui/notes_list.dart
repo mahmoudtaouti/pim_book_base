@@ -13,7 +13,7 @@ class NotesList extends StatefulWidget {
 
 class _NotesListState extends State<NotesList> {
 
-  Future _deleteNote(BuildContext context , Note inNote){
+  _deleteNote(BuildContext context , Note inNote){
     return showDialog(context: context, builder: (BuildContext inContext){
       return AlertDialog(
         title: Text("Delete"),
@@ -97,18 +97,7 @@ class _NotesListState extends State<NotesList> {
             return Container(
               padding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 0.0),
               child: Slidable(
-                actionPane: SlidableStrechActionPane(),
-                actionExtentRatio: 0.2,
-                secondaryActions: [
-                  IconSlideAction(
-                    caption: "delete",
-                    foregroundColor: Colors.redAccent,
-                    color: Colors.white.withOpacity(0.0),
-                    icon: Icons.delete,
-                    //iconWidget: Icon(Icons.delete,color: Colors.redAccent,),
-                    onTap: ()=> _deleteNote(context,note),
-                  )
-                ],
+
                 child: Stack(
                   children: [
                     Container(
@@ -137,6 +126,19 @@ class _NotesListState extends State<NotesList> {
                     )
                   ],
                 ),
+
+                endActionPane:  ActionPane(
+                  motion: ScrollMotion(),
+                  children: [
+                    SlidableAction(
+                      onPressed: _deleteNote(context,note),
+                      backgroundColor: Color(0xFFFE4A49),
+                      foregroundColor: Colors.white,
+                      icon: Icons.delete,
+                      label: 'Delete',
+                    ),
+                  ],
+                ), // Add this line
               ),
             );
           }
