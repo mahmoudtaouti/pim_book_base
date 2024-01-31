@@ -14,7 +14,7 @@ import 'package:provider/provider.dart';
 
 class AppointmentsList extends StatelessWidget {
 
-  Future _deleteAppointments(BuildContext context, Appointment appointment) {
+  _deleteAppointments(BuildContext context, Appointment appointment) {
     return showDialog(
         context: context,
         builder: (BuildContext inContext) {
@@ -46,7 +46,7 @@ class AppointmentsList extends StatelessWidget {
         });
   }
 
-  void _editAppointments(
+  _editAppointments(
     BuildContext inContext, Appointment appointment) async {
     AppointmentsModel appointmentsModel=  Provider.of<AppointmentsModel>(inContext,listen: false);
     if (appointmentsModel.entityBeingEdited.apptDate == null) {
@@ -164,25 +164,35 @@ class AppointmentsList extends StatelessWidget {
                               margin: EdgeInsets.only(bottom: 8.0),
                               color: Colors.grey.withOpacity(0.2),
                               child: ListTile(
-                                title:
-                                Text("${appointment.title}$apptTime"),
+                                title: Text("${appointment.title}$apptTime"),
                                 subtitle: Text(appointment.description!),
-                                onTap: () async {
-                                  _editAppointments(context, appointment);
-                                },
                               ),
                             ),
-                            actionPane: SlidableStrechActionPane(),
-                            secondaryActions: [
-                              IconSlideAction(
-                                icon: Icons.delete,
-                                foregroundColor: Colors.redAccent,
-                                onTap: () async {
-                                  _deleteAppointments(
-                                      inInContext, appointment);
-                                },
-                              )
-                            ],
+                            startActionPane: ActionPane(
+                              motion: const ScrollMotion(),
+                              dismissible: DismissiblePane(onDismissed: () {}),
+                              children: [
+                                SlidableAction(
+                                  onPressed: _editAppointments(context, appointment),
+                                  backgroundColor: Color(0xFF21B7CA),
+                                  foregroundColor: Colors.white,
+                                  icon: Icons.share,
+                                  label: 'Edit',
+                                ),
+                              ],
+                            ),
+                            endActionPane:  ActionPane(
+                              motion: ScrollMotion(),
+                              children: [
+                                SlidableAction(
+                                  onPressed: _deleteAppointments(inInContext, appointment),
+                                  backgroundColor: Color(0xFFFE4A49),
+                                  foregroundColor: Colors.white,
+                                  icon: Icons.delete,
+                                  label: 'Delete',
+                                ),
+                              ],
+                            ), // Add this line
                           );
                         }
                     ),),

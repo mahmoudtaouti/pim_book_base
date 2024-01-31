@@ -75,33 +75,40 @@ class _TasksListState extends State<TasksList> {
               dueDate = DateFormat.yMMMMd("en_US").format(date.toLocal());
             }
             return Slidable(
-              actionPane: SlidableStrechActionPane(),
-              actionExtentRatio: 0.2,
-              actions: [
-                IconSlideAction(
-                  caption: "edit",
-                  foregroundColor: Colors.lightBlueAccent,
-                  icon: Icons.edit,
-                  onTap: (){
-                    readableTasksModel.entityBeingEdited = task;
-                    if (readableTasksModel.entityBeingEdited.dueDate == null)   {
-                      readableTasksModel.chosenDate = null;
-                    }  else{
-                      readableTasksModel.chosenDate = readableTasksModel.entityBeingEdited.dueDate;
-                    }
-                    readableTasksModel.stackIndex = 1;
-                  },
-                )
-              ],
-              secondaryActions: [
-                IconSlideAction(
-                  caption: "delete",
-                  foregroundColor: Colors.redAccent,
-                  color: Colors.white.withOpacity(0.0),
-                  icon: Icons.delete,
-                  onTap: ()=> _deleteTask(context,task),
-                )
-              ],
+              startActionPane: ActionPane(
+                motion: const ScrollMotion(),
+                dismissible: DismissiblePane(onDismissed: () {}),
+                children: [
+                  SlidableAction(
+                    onPressed: (context){
+                      readableTasksModel.entityBeingEdited = task;
+                      if (readableTasksModel.entityBeingEdited.dueDate == null)   {
+                        readableTasksModel.chosenDate = null;
+                      }  else{
+                        readableTasksModel.chosenDate = readableTasksModel.entityBeingEdited.dueDate;
+                      }
+                      readableTasksModel.stackIndex = 1;
+                    },
+                    backgroundColor: Color(0xFF21B7CA),
+                    foregroundColor: Colors.white,
+                    icon: Icons.share,
+                    label: 'Edit',
+                  ),
+                ],
+              ),
+              endActionPane:  ActionPane(
+                motion: ScrollMotion(),
+                children: [
+                  SlidableAction(
+                    onPressed: (context)=> _deleteTask(context,task),
+                    backgroundColor: Color(0xFFFE4A49),
+                    foregroundColor: Colors.white,
+                    icon: Icons.delete,
+                    label: 'Delete',
+                  ),
+                ],
+              ), // Add this line
+
               child: Stack(
                 children: [
                   ListTile(

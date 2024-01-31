@@ -35,11 +35,11 @@ dependencies:
 
   # A Flutter implementation of slidable list item
   # with directional slide actions that can be dismissed.
-  flutter_slidable: ^0.6.0
+  flutter_slidable: ^3.0.1
 
   # Contains code to deal with internationalized/localized messages,
   # date and number formatting and parsing, bi-directional text, and other internationalization issues.
-  intl: ^0.17.0
+  intl: ^0.18.1
 
   # Calendar widget for flutter that is swipeable.
   # This widget can help you build customizable calendar with scrollable actions.
