@@ -1,81 +1,156 @@
-import 'dart:io';
 
-import 'package:path/path.dart';
 import 'package:pim_book/features/tasks/domain/task.dart';
+import 'package:pim_book/features/tasks/domain/tasks_repository.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:pim_book/core/utils.dart' as utils;
+import '../../../core/data/pim_db.dart';
 
 
+class TasksDBWorker  implements TasksRepository{
 
-class TasksDBWorker{
+  Database? _cachedDb; // Cache the database instance after successful initialization
 
-  TasksDBWorker._(){
-    database;
-  }
-  static final instance = TasksDBWorker._();
-
-  Database? _db;
-
-  Future get database async {
-    if (_db == null) {
-      _db = await init();
-    }
-    return _db;
-  }
-
-  Future<Database> init() async{
-    Directory docsDir = await utils.Utils.docsDir;
-    String path = join(docsDir.path,"tasks.db");
-    Database db = await openDatabase(path,
-        version: 1,
-        onOpen: (db){},
-        onCreate: (Database inDB,int inVersion)async{
-          await inDB.execute("CREATE TABLE IF NOT EXISTS tasks("
-              "id INTEGER PRIMARY KEY,"
-              "description TEXT,"
-              "dueDate TEXT,"
-              "completed TEXT"
-              ")"
-          );
-        }
+  Future<Database> _initializeDatabase() async {
+    final result = await PIMdb.instance.init();
+    return result.fold(
+          (failure) {
+        // Handle the failure (e.g., show an error message, log, etc.)
+        throw Exception("Failed to initialize database: $failure");
+      },
+          (db) {
+        // Cache the database instance
+        _cachedDb = db;
+        return db;
+      },
     );
-    return db;
   }
 
-  Future create(Task inTask)async{
-    Database db = await database;
+  Future<Database> get _database async {
+    return _cachedDb ?? await _initializeDatabase();
+  }
+
+  @override
+  Future<int> createTask(Task task) async {
+    final db = await _database;
     var val = await db.rawQuery("SELECT MAX(id) + 1 AS id FROM tasks");
     int? id = val.first["id"] as int?;
     if (id == null) {
       id = 1;
     }
-    return await db.rawInsert(
-        "INSERT INTO tasks (id,description,dueDate,completed) VALUES(?,?,?,?)",
-        [id,inTask.description,inTask.dueDate,inTask.completed]
-    );
-
+    /// update the id
+    task.id = id;
+    return await db.insert('tasks', task.toMap());
   }
 
-  Future<Task> get(int inId)async{
-    Database db = await database;
-    var rec = await db.query("tasks",where: "id = ?",whereArgs: [inId]);
-    return Task.fromMap(rec.first);
+  @override
+  Future<int> createGroup(GroupTask groupTask) async {
+    final db = await _database;
+    var val = await db.rawQuery("SELECT MAX(id) + 1 AS id FROM group_tasks");
+    int? id = val.first["id"] as int?;
+    if (id == null) {
+      id = 1;
+    }
+    /// update the id
+    groupTask.id = id;
+    return await db.insert('group_tasks', groupTask.toMap());
   }
 
-  Future<List> getAll()async{
-    Database db = await database;
-    var recs = await db.query("tasks");
-    var list = recs.isNotEmpty ? recs.map((e) => Task.fromMap(e)).toList() : [];
-    return list;
+  @override
+  Future<Task> getTask(int id) async {
+    final db = await _database;
+    final maps = await db.query('tasks', where: 'id = ?', whereArgs: [id]);
+    return Task.fromMap(maps.first);
   }
 
-  Future update(Task inTask)async{
-    Database db = await database;
-    return await db.update("tasks", Task.toMap(inTask),where: "id = ?",whereArgs: [inTask.id]);
+  @override
+  Future<GroupTask> getGroup(int id) async {
+    final db = await _database;
+    final result = await db.query('group_tasks', where: 'id = ?', whereArgs: [id]);
+    return GroupTask.fromMap(result.first);
   }
 
-  Future delete(int inId)async{
-    Database db = await database;
-    return await db.delete("tasks",where: "id = ?",whereArgs: [inId]);
+  @override
+  Future<int> updateTask(Task task) async {
+    final db = await _database;
+    return await db.update('tasks', task.toMap(), where: 'id = ?', whereArgs: [task.id]);
   }
+
+  @override
+  Future<int> updateGroup(GroupTask groupTask) async {
+    final db = await _database;
+    return db.update('group_tasks', groupTask.toMap(), where: 'id = ?', whereArgs: [groupTask.id]);
+  }
+
+  @override
+  Future<int> deleteTask(int id) async {
+    final db = await _database;
+    return await db.delete('tasks', where: 'id = ?', whereArgs: [id]);
+  }
+
+  @override
+  Future<int> deleteGroup(int id) async {
+    final db = await _database;
+    return db.delete('group_tasks', where: 'id = ?', whereArgs: [id]);
+  }
+
+  @override
+  Future<List<Task>> getOnlyTasks() async {
+    final db = await _database;
+    final maps = await db.query('tasks', orderBy: 'dateCreated DESC');
+    return List.generate(maps.length, (index) => Task.fromMap(maps[index]));
+  }
+
+  @override
+  Future<List<GroupTask>> getOnlyGroups() async {
+    final db = await _database;
+    final result = await db.query('group_tasks', orderBy: 'dateCreated DESC');
+    return result.map((e) => GroupTask.fromMap(e)).toList();
+  }
+
+
+  @override
+  Future<List<dynamic>> getAll() async {
+    final db = await _database;
+    final tasks = await db.query('tasks', orderBy: 'dateCreated DESC');
+    final groupTasks = await db.query('group_tasks', orderBy: 'dateCreated DESC');
+    final allTasks = <Task>[];
+    final allGroupTasks = <GroupTask>[];
+
+    for (final task in tasks) {
+      allTasks.add(Task.fromMap(task));
+    }
+
+    for (final groupTask in groupTasks) {
+      allGroupTasks.add(GroupTask.fromMap(groupTask));
+    }
+
+    final all = <dynamic>[];
+    all.addAll(allTasks);
+    all.addAll(allGroupTasks);
+    all.sort((a, b) => b.dateCreated.compareTo(a.dateCreated));
+
+    return all;
+  }
+
+
+
+  @override
+  Future<List<dynamic>> getAllChecked() {
+    // TODO: implement getAllChecked
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<dynamic>> getAllDueDate() {
+    // TODO: implement getAllDueDate
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<dynamic>> getAllUnchecked() {
+    // TODO: implement getAllUnchecked
+    throw UnimplementedError();
+  }
+
+
+
 }

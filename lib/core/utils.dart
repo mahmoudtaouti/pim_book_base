@@ -1,15 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:pim_book/features/appointments/domain/appointments_model.dart';
-import 'base_model.dart';
-
-
-
-
 
 class Utils{
+
+  static final initDate = DateTime(0);
 
   Utils._();
   static Directory? _docsDir;
@@ -21,43 +16,34 @@ class Utils{
     return _docsDir!;
   }
 
-}
-
-
-
-
-Future selectDate(BuildContext inContext ,BaseModel inModel,String? inDateString) async {
-  DateTime initDate = DateTime.now();
-  if (inDateString != null) {
-    initDate = dateTimeFromString(inDateString);
+  static bool areDatesEqual(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 
-  DateTime? picked = await
-      showDatePicker(
-          context: inContext,
-          initialDate: initDate,
-          firstDate: DateTime(1900),
-          lastDate: DateTime(2060)
-      );
-  if (picked != null) {
-    //inModel.chosenDate = DateFormat.yMMMMd("en_US").format(picked.toLocal());
-    return "${picked.year},${picked.month},${picked.day}";
+  /// validate datetime so it's not an initial datetime (case: datetime not selected)
+  static bool isDateValid(DateTime dateTime){
+    return initDate.millisecondsSinceEpoch != dateTime.millisecondsSinceEpoch;
   }
 
 }
 
-Future selectTime(BuildContext context,AppointmentsModel model) async{
-  TimeOfDay initialTime = TimeOfDay.now();
-  if (model.entityBeingEdited.apptTime != null) {
-    initialTime = timeOfDayFromString(model.entityBeingEdited.apptTime!);
-  }
-  TimeOfDay? picked = await showTimePicker(context: context, initialTime: initialTime);
-  if (picked != null) {
-    model.entityBeingEdited.apptTime = "${picked.hour},${picked.minute}";
-    model.apptTime = picked.format(context);
-    return "${picked.hour},${picked.minute}";
-  }
-}
+
+
+
+// Future selectTime(BuildContext context,RemindersModel model) async{
+//   TimeOfDay initialTime = TimeOfDay.now();
+//   if (model.entityBeingEdited.time != null) {
+//     initialTime = timeOfDayFromString(model.entityBeingEdited.time!);
+//   }
+//   TimeOfDay? picked = await showTimePicker(context: context, initialTime: initialTime);
+//   if (picked != null) {
+//     model.entityBeingEdited.time = "${picked.hour},${picked.minute}";
+//     model.apptTime = picked.format(context);
+//     return "${picked.hour},${picked.minute}";
+//   }
+// }
 
 
 DateTime dateTimeFromString(String dateString){
@@ -78,7 +64,6 @@ TimeOfDay timeOfDayFromString(String timeString){
 }
 
 Color shadeColor(int value,int percent,int alpha) {
-
 
   String color = value.toRadixString(16);
 

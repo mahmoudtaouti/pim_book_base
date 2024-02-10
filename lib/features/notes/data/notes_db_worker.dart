@@ -1,78 +1,76 @@
-import 'dart:io';
-
-import 'package:path/path.dart';
 import 'package:pim_book/features/notes/domain/note.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:pim_book/core/utils.dart' as utils;
+import '../../../core/data/pim_db.dart';
+import '../domain/notes_repository.dart';
 
-class NotesDBWorker{
+class NotesDBWorker implements NotesRepository {
 
-  NotesDBWorker._(){
-    database;
-  }
-  static final instance = NotesDBWorker._();
+  Database? _cachedDb; // Cache the database instance after successful initialization
 
-  Database? _db;
-  Future get database async {
-    if (_db == null) {
-      _db = await init();
-    }
-    return _db;
-  }
-
-  Future<Database> init() async{
-    Directory docsDir = await utils.Utils.docsDir;
-    String path = join(docsDir.path,"notes.db");
-    Database db = await openDatabase(path,
-        version: 1,
-        onOpen: (db){},
-      onCreate: (Database inDB,int inVersion)async{
-      await inDB.execute("CREATE TABLE IF NOT EXISTS notes("
-        "id INTEGER PRIMARY KEY,"
-        "title TEXT,"
-        "content TEXT,"
-        "color TEXT"
-        ")"
-      );
-      }
+  Future<Database> _initializeDatabase() async {
+    final result = await PIMdb.instance.init();
+    return result.fold(
+          (failure) {
+        //TODO Handle the failure (e.g., show an error message, log, etc.)
+        throw Exception("Failed to initialize database: $failure");
+      },
+          (db) {
+        // Cache the database instance
+        _cachedDb = db;
+        return db;
+      },
     );
-    return db;
   }
 
-  Future create(Note inNote)async{
-    Database db = await database;
+  Future<Database> get _database async {
+    return _cachedDb ?? await _initializeDatabase();
+  }
+
+  @override
+  Future<int> create(Note note) async {
+    final db = await _database;
     var val = await db.rawQuery("SELECT MAX(id) + 1 AS id FROM notes");
     int? id = val.first["id"] as int?;
     if (id == null) {
       id = 1;
     }
-    return await db.rawInsert(
-        "INSERT INTO notes (id,title,content,color) VALUES(?,?,?,?)",
-        [id,inNote.title,inNote.content,inNote.color]
-    );
-
+    /// update the id
+    note.id = id;
+    return await db.insert('notes', note.toMap());
   }
 
-  Future<Note> get(int inId)async{
-    Database db = await database;
-    var rec = await db.query("notes",where: "id = ?",whereArgs: [inId]);
-    return Note.fromMap(rec.first);
+  @override
+  Future<Note> get(int id) async {
+    final db = await _database;
+    final maps = await db.query('notes', where: 'id = ?', whereArgs: [id]);
+    return Note.fromMap(maps.first);
   }
 
-  Future<List> getAll()async{
-    Database db =await database;
-    var recs = await db.query("notes");
-    var list = recs.isNotEmpty ? recs.map((e) => Note.fromMap(e)).toList() : [];
-    return list;
+  @override
+  Future<int> update(Note note) async {
+    final db = await _database;
+    return await db.update('notes', note.toMap(), where: 'id = ?', whereArgs: [note.id]);
   }
 
-  Future update(Note inNote)async{
-    Database db = await database;
-    return await db.update("notes", Note.toMap(inNote),where: "id = ?",whereArgs: [inNote.id]);
+  @override
+  Future<int> delete(int id) async {
+    final db = await _database;
+    return await db.delete('notes', where: 'id = ?', whereArgs: [id]);
   }
 
-  Future delete(int inId)async{
-    Database db = await database;
-    return await db.delete("notes",where: "id = ?",whereArgs: [inId]);
+  @override
+  Future<List<Note>> getAllDescendants() async {
+    final db = await _database;
+    final maps = await db.query('notes', orderBy: 'dateEdited DESC');
+    return List.generate(maps.length, (index) => Note.fromMap(maps[index]));
   }
+
+  // Implement other methods as needed
+
+  @override
+  Future<List<Note>> getAllAscendants() {
+    // TODO: implement getAllAscendants
+    throw UnimplementedError();
+  }
+
 }

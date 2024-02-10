@@ -1,144 +1,91 @@
+import 'package:flutter/cupertino.dart';
+import 'package:get/get.dart';
+import '../application/tasks_ctrl.dart';
+import '../domain/task.dart';
+import 'component/group_task_tile.dart';
+import 'component/task_tile.dart';
 
-import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:intl/intl.dart';
-import 'package:pim_book/features/tasks/data/tasks_db_worker.dart';
-import 'package:pim_book/features/tasks/domain/task.dart';
-import 'package:pim_book/features/tasks/domain/tasks_model.dart';
-import 'package:pim_book/core/utils.dart' as utils;
-import 'package:provider/provider.dart';
+class TasksListView extends GetView<TasksController> {
+  final TasksController ctrl;
 
-class TasksList extends StatefulWidget {
-  @override
-  _TasksListState createState() => _TasksListState();
-}
-
-class _TasksListState extends State<TasksList> {
-  Future _deleteTask(BuildContext context,Task task){
-    return showDialog(context: context, builder: (BuildContext inContext){
-
-      return AlertDialog(
-        title: Text("Delete"),
-        content: Text("Are you sure you wont delete ${task.description}"),
-        actions: [
-          TextButton(
-              onPressed: (){
-                Navigator.pop(inContext);
-              },
-              child: Text("cancel")
-          ),
-          TextButton(
-              onPressed: () async{
-                await TasksDBWorker.instance.delete(task.id!);
-                Navigator.pop(inContext);
-                ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        duration: Duration(seconds: 2),
-                        content: Text("Task deleted",style: TextStyle(color: Colors.redAccent),)
-                    )
-                );
-               context.read<TasksModel>().loadData("tasks", TasksDBWorker.instance);
-              },
-              child: Text("delete")
-          ),
-        ],
-      );
-    });
-  }
-
-
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  final int filter;
+  TasksListView({required this.ctrl, required this.filter});
 
   @override
   Widget build(BuildContext context) {
-    TasksModel readableTasksModel = Provider.of<TasksModel>(context,listen: false);
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          readableTasksModel.entityBeingEdited = Task();
-          readableTasksModel.stackIndex = 1;
-        },
-        child: Icon(Icons.add),
-      ),
-      body: ListView.builder(
-          padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
-          itemCount: context.watch<TasksModel>().data.length,
-          itemBuilder: (buildContext,index){
-            Task task = context.watch<TasksModel>().data[index];
-            String dueDate = "";
-            if (task.dueDate != null) {
-              DateTime date = utils.dateTimeFromString(task.dueDate!);
-              dueDate = DateFormat.yMMMMd("en_US").format(date.toLocal());
-            }
-            return Slidable(
-              startActionPane: ActionPane(
-                motion: const ScrollMotion(),
-                dismissible: DismissiblePane(onDismissed: () {}),
-                children: [
-                  SlidableAction(
-                    onPressed: (context){
-                      readableTasksModel.entityBeingEdited = task;
-                      if (readableTasksModel.entityBeingEdited.dueDate == null)   {
-                        readableTasksModel.chosenDate = null;
-                      }  else{
-                        readableTasksModel.chosenDate = readableTasksModel.entityBeingEdited.dueDate;
-                      }
-                      readableTasksModel.stackIndex = 1;
-                    },
-                    backgroundColor: Color(0xFF21B7CA),
-                    foregroundColor: Colors.white,
-                    icon: Icons.share,
-                    label: 'Edit',
-                  ),
-                ],
-              ),
-              endActionPane:  ActionPane(
-                motion: ScrollMotion(),
-                children: [
-                  SlidableAction(
-                    onPressed: (context)=> _deleteTask(context,task),
-                    backgroundColor: Color(0xFFFE4A49),
-                    foregroundColor: Colors.white,
-                    icon: Icons.delete,
-                    label: 'Delete',
-                  ),
-                ],
-              ), // Add this line
+    return Obx(
+      () => SingleChildScrollView(
+        child: ListView.builder(
+            physics: NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: ctrl.tasks.length + 1,
+            itemBuilder: (context, index) {
+              if (index < ctrl.tasks.length) {
+                final task = ctrl.tasks[index];
+                if (task is Task && (filter == 0 || filter == 1)) {
+                  return _buildTaskTile(context, task);
+                }
+                if (task is GroupTask && (filter == 0 || filter == 2)) {
+                  return _buildGroupTask(context, task);
+                } else {
+                  return SizedBox.shrink();
+                }
+              } else {
+                if (index < 20) {
+                  String message = index == 0
+                      ? 'Your to-do list seems a bit light. Let\'s make it more exciting – add some tasks!'
+                      : '';
+                  message = 0 < index && index <= 6
+                      ? 'No worries, Rome wasn\'t built in a day! Add a few more tasks to see the magic.'
+                      : message;
+                  message = 6 < index && index <= 16
+                      ? 'Your list is growing! Each task completed is a step closer to your goals.'
+                      : message;
+                  message = 16 < index
+                      ? 'Your task list is booming! Give yourself a well-deserved pat on the back.'
+                      : message;
 
-              child: Stack(
-                children: [
-                  ListTile(
-                    enabled: task.completed =="true" ? false : true,
-                    leading: Checkbox(
-                      onChanged: (bool? value) async{
-                        task.completed = value.toString();
-                        await TasksDBWorker.instance.update(task);
-                        readableTasksModel.notifyListeners();
-                      },
-                      value: task.completed == "true" ? true : false,),
-                    title: Text("${task.description}",style: task.completed =="true" ?
-                    TextStyle(
-                        decoration: TextDecoration.lineThrough
-                    ) :
-                    TextStyle(
-                        decoration: TextDecoration.none
+                  return Container(
+                    height: Get.size.height / 1.2,
+                    padding: EdgeInsets.symmetric(vertical: 0, horizontal: 32),
+                    child: Center(
+                      child: Text(
+                        message,
+                        style: Get.textTheme.displayMedium
+                            ?.copyWith(fontWeight: FontWeight.w200),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                    ),
-                    subtitle: Text("$dueDate"),
-                  ),
-                  Positioned(
-                    bottom: 0.0,
-                    left: 0.0,
-                    right: 0.0,
-                    child: Divider(height: 0,thickness: 1,indent: 20,endIndent: 20,color: task.completed =="true" ? Colors.white.withOpacity(0.0):Colors.amber,),)
-                ],
-              ),
-            );
-          },
-    ));
+                  );
+                }
+              }
+            }),
+      ),
+    );
+  }
+
+  Widget _buildTaskTile(BuildContext context, Task task) {
+    return TaskTile(
+      task: task,
+      onChange: (value) {
+        ctrl.updateTaskCheckedStatus(task, value);
+        ctrl.update();
+      },
+      ctrl: ctrl,
+    );
+  }
+
+  _buildGroupTask(BuildContext context, GroupTask groupTask) {
+    return GroupTaskTile(
+      groupTask: groupTask,
+      ctrl: ctrl,
+    );
+  }
+
+  Widget _buildUnknownTaskTile() {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: CupertinoActivityIndicator(),
+    );
   }
 }
