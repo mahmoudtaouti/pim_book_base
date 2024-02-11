@@ -24,6 +24,7 @@ class PIMdb {
   Future<Either<DatabaseFailure, Database>> init() async {
     try {
       Directory docsDir = await utils.Utils.docsDir;
+
       String path = join(docsDir.path, "pim.db");
 
       //TODO: Check for insufficient storage space

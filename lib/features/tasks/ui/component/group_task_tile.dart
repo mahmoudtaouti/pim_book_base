@@ -1,9 +1,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
-
-import '../../../../core/utils.dart';
 import '../../application/tasks_ctrl.dart';
 import '../../domain/task.dart';
 import 'custom_check_box.dart';

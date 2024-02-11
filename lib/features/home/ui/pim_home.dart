@@ -2,6 +2,7 @@ import 'package:bottom_bar/bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:pim_book/core/theme/pim_icons.dart';
 import 'package:pim_book/core/theme/pim_theme.dart';
+import '../../../core/data/pim_db.dart';
 import '../../../core/theme/color_themes.dart';
 import '../../../core/theme/config.dart';
 import '../../../core/utils.dart';
@@ -27,23 +28,33 @@ class PIMBook extends StatefulWidget {
 
 class _PIMBookState extends State<PIMBook> {
   final PIMBookController controller = Get.put(PIMBookController());
-
+  late final dbInit;
   @override
   void initState() {
     Utils.docsDir;
     currentThemeMode.addListener(() {
       setState(() {});
     });
+    checkDB();
     super.initState();
+  }
+
+  checkDB()async{
+    dbInit = await PIMdb.instance.init();
+    if(dbInit.isLeft()){
+      Get.snackbar('Failed to access Documents Directory', 'Not Found',margin: EdgeInsets.symmetric(vertical: 20,horizontal: 8));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+
     return GetMaterialApp(
       title: "PIMBook",
+      //TODO : add more themes in premium version
       theme: PIMTheme.lightTheme,
       darkTheme: PIMTheme.darkTheme,
-      themeMode: ThemeMode.system, //TODO : change Theme Manually
+      themeMode: ThemeMode.system,
       home: Obx((){
           return Scaffold(
             appBar: AppBar(
