@@ -26,9 +26,9 @@ class TasksController extends GetxController {
   }
 
   @override
-  void onInit() {
-    super.onInit();
+  void onInit() async {
     fetchAll();
+    super.onInit();
   }
 
   Future<void> fetchAll() async {

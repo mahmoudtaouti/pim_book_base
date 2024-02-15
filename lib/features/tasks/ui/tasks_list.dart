@@ -33,10 +33,10 @@ class TasksListView extends GetView<TasksController> {
               } else {
                 if (index < 20) {
                   String message = index == 0
-                      ? 'Your to-do list seems a bit light. Let\'s make it more exciting – add some tasks!'
+                      ? 'Your to-do list seems empty. Let\'s make it more exciting – add some tasks!'
                       : '';
                   message = 0 < index && index <= 6
-                      ? 'No worries, Rome wasn\'t built in a day! Add a few more tasks to see the magic.'
+                      ? 'Your to-do list seems a bit light! Add a few more tasks to see the magic.'
                       : message;
                   message = 6 < index && index <= 16
                       ? 'Your list is growing! Each task completed is a step closer to your goals.'
@@ -46,7 +46,7 @@ class TasksListView extends GetView<TasksController> {
                       : message;
 
                   return Container(
-                    height: Get.size.height / 1.2,
+                    height: Get.size.height / 1.46,
                     padding: EdgeInsets.symmetric(vertical: 0, horizontal: 32),
                     child: Center(
                       child: Text(

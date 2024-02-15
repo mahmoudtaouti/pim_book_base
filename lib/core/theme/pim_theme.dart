@@ -1,23 +1,58 @@
+import 'dart:async';
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:pim_book/core/theme/text_themes.dart';
 
 import 'color_themes.dart';
 
 class PIMTheme with ChangeNotifier {
-  static bool _isDarkTheme = true;
 
-  ThemeMode get currentTheme => _isDarkTheme ? ThemeMode.dark : ThemeMode.light;
+  late ThemeMode _currentTheme = ThemeMode.system;
+  ThemeMode get currentTheme => _currentTheme;
 
-  void toggleTheme() {
-    _isDarkTheme = !_isDarkTheme;
+  changeThemeMode(ThemeMode themeMode){
+    _currentTheme = themeMode;
     notifyListeners();
   }
 
-  bool get isDarkTheme => _isDarkTheme;
+  PIMTheme._();
+
+  factory PIMTheme.followSystem(){
+    PIMTheme pimTheme = PIMTheme._();
+    pimTheme._listen();
+    return pimTheme;
+  }
+
+  factory PIMTheme.localChanges(){
+    PIMTheme pimTheme = PIMTheme._();
+    pimTheme.toggleTheme(ThemeMode.light);
+    return pimTheme;
+  }
+
+
+  _listen(){
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      final themeMode = _currentTheme;
+      _currentTheme = Get.isPlatformDarkMode ? ThemeMode.dark : ThemeMode.system;
+      if(themeMode != _currentTheme){
+        print('theme mode changes $themeMode != $_currentTheme');
+        notifyListeners();
+      }
+    });
+  }
+
+
+  void toggleTheme(ThemeMode themeMode){
+    _currentTheme = themeMode;
+    notifyListeners();
+  }
 
 
   static ThemeData lightTheme = ThemeData.from(
     colorScheme: ColorThemes.lightColorScheme,
+    useMaterial3: true,
   ).copyWith(
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -81,6 +116,7 @@ class PIMTheme with ChangeNotifier {
 
   static ThemeData darkTheme = ThemeData.from(
     colorScheme: ColorThemes.darkColorScheme,
+    useMaterial3: true,
   ).copyWith(
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,

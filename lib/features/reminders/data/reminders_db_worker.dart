@@ -63,9 +63,9 @@ class RemindersDBWorker extends RemindersRepository {
   }
 
   @override
-  Future<List<Reminder>> getAll() async {
+  Future<List<Reminder>> getAllDescendant() async {
     final db = await _database;
-    final maps = await db.query('reminders', orderBy: 'date DESC, time DESC');
+    final maps = await db.query('reminders', orderBy: 'time ASC'); // or use 'date DESC, time DESC'
     return List.generate(maps.length, (index) => Reminder.fromMap(maps[index]));
   }
 

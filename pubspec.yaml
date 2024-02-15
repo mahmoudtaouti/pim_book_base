@@ -1,5 +1,5 @@
 name: pim_book
-description: a personal information manager application, that stores some basic information (appointments, contacts, notes, and tasks).
+description: a personal information manager application, that stores some basic information (reminders, notes, and tasks).
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -31,21 +31,11 @@ dependencies:
   # For getting commonly
   # used locations on host platform file systems, such as the temp and app data directories.
   path_provider: ^2.1.2
-
-  # A Flutter implementation of slidable list item
-  # with directional slide actions that can be dismissed.
-  flutter_slidable: ^3.0.1
-
-  # Contains code to deal with internationalized/localized messages,
-  # date and number formatting and parsing, bi-directional text, and other internationalization issues.
   intl: ^0.18.1
 
-  # Calendar widget for flutter that is swipeable.
-  # This widget can help you build customizable calendar with scrollable actions.
-  flutter_calendar_carousel: ^2.0.3
 
   get: ^4.6.1
-  flutter_svg: ^1.0.9
+  flutter_svg: ^2.0.9
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -55,9 +45,16 @@ dependencies:
   dartz: ^0.10.1
   freezed: ^2.4.1
   freezed_annotation: ^2.4.1
+  flutter_local_notifications: ^16.3.2
 
   bottom_bar: ^2.0.3
-  quill_html_editor: ^2.2.8
+
+  # depending in different intl package version 0.18.1 and 0.19.0
+  flutter_quill: ^9.2.12
+  easy_date_timeline: ^1.0.3
+
+dependency_overrides:
+  path: ^1.9.0
 
 dev_dependencies:
   flutter_test:

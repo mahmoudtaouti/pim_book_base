@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:dartz/dartz.dart';
 import '../../../core/domain/failures.dart';
 
-class TaskUnit {
+class TaskUnit{
   String title = '';
   bool checked = false;
 
@@ -32,7 +32,7 @@ class TaskUnit {
   }
 }
 
-class Task extends TaskUnit {
+class Task extends TaskUnit implements Comparable<Task> {
   int? id;
   int dueDate;
   int dateCreated;
@@ -63,11 +63,22 @@ class Task extends TaskUnit {
     });
     return baseMap;
   }
+
+  @override
+  int compareTo(Task other) {
+    if (dateEdited < other.dateEdited) {
+      return -1;
+    } else if (dateEdited > other.dateEdited) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
 }
 
 
 
-class GroupTask {
+class GroupTask implements Comparable<GroupTask> {
   int? id;
   String title = '';
   List<TaskUnit> _taskUnits = [];
@@ -134,4 +145,16 @@ class GroupTask {
     };
     return map;
   }
+
+  @override
+  int compareTo(GroupTask other) {
+    if (dateEdited < other.dateEdited) {
+      return -1;
+    } else if (dateEdited > other.dateEdited) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
 }

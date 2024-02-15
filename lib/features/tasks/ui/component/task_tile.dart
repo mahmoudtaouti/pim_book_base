@@ -96,6 +96,7 @@ class _TaskTileState extends State<TaskTile> {
       context: context,
       builder: (context) {
         return Container(
+          width: Get.width,
           padding: EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -106,7 +107,7 @@ class _TaskTileState extends State<TaskTile> {
               ),
               SizedBox(height: 16),
               Text(
-                'Are you sure you want to delete this task?',
+                widget.task.title,
                 style: Get.textTheme.titleMedium,
               ),
               SizedBox(height: 16),

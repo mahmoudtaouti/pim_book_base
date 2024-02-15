@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:pim_book/core/theme/pim_icons.dart';
 
 import '../application/group_tasks_ctrl.dart';
 import 'component/add_task_units_box.dart';
@@ -11,14 +12,13 @@ class NewGroupTaskScreen extends StatelessWidget {
   final ctrl = NewGroupTaskController();
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Text('New Group Task'),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Container(
-        padding: EdgeInsets.symmetric(vertical: 9,horizontal: 23),
+        padding: EdgeInsets.symmetric(vertical: 9, horizontal: 23),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.max,
@@ -36,28 +36,32 @@ class NewGroupTaskScreen extends StatelessWidget {
                 });
                 //newGroupTaskController.createGroupTask();
               },
-              icon: Icon(
-                Icons.calendar_month_rounded,
-                color: Get.theme.colorScheme.onSurfaceVariant,
-                size: 28,
-              ),
+              icon: PIMIcons.fromAsset(iconName: PIMIcons.calendar, color: Get.iconColor!,size: 32),
             ),
-            Text('Edited\n${DateFormat.yMMMd().format(DateTime.now())}',style: Get.textTheme.bodySmall,textAlign: TextAlign.center,),
-            IconButton(
-              onPressed: () {
-                ctrl.createGroupTask();
-              },
-              icon: Icon(
-                Icons.check_circle,
-                color: Get.theme.colorScheme.onSurfaceVariant,
-                size: 52,
+            Text(
+              'Edited\n${DateFormat.yMMMd().format(DateTime.now())}',
+              style: Get.textTheme.bodySmall,
+              textAlign: TextAlign.center,
+            ),
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              child: FloatingActionButton(
+                child: Icon(
+                  Icons.check,
+                  size: 32,
+                ),
+                backgroundColor: Get.theme.colorScheme.tertiaryContainer,
+                foregroundColor: Get.theme.colorScheme.onTertiaryContainer,
+                onPressed: () {
+                  ctrl.createGroupTask();
+                },
               ),
             ),
           ],
         ),
       ),
       body: Container(
-        padding: const EdgeInsets.only(bottom: 90,left: 12,right: 12,top: 8),
+        padding: const EdgeInsets.only(bottom: 90, left: 12, right: 12, top: 8),
         child: ListView(
           children: [
             Container(
@@ -86,5 +90,3 @@ class NewGroupTaskScreen extends StatelessWidget {
     );
   }
 }
-
-

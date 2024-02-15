@@ -7,5 +7,5 @@ abstract class RemindersRepository{
   Future<int> update(Reminder note);
   Future<int> delete(int id);
 
-  Future<List<Reminder>> getAll();
+  Future<List<Reminder>> getAllDescendant();
 }

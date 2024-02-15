@@ -1,20 +1,26 @@
 import 'package:dartz/dartz.dart';
 import '../../../core/domain/failures.dart';
 
-class Note {
+class Note implements Comparable<Note> {
 
   int? id;
   String title = '';
   String content = '';
-  String? color;
-  int? dateCreated;
+  String color;
+  int dateCreated;
   int dateEdited;
 
-  Note(this.dateEdited);
-  Note.set(this.id, this.title, this.content, this.color, this.dateCreated, this.dateEdited);
+  Note(
+      {this.id,
+      required this.title,
+      required this.content,
+      required this.color,
+      required this.dateCreated,
+      required this.dateEdited});
 
   Either<ValueFailure, Unit> isValid() {
-    if (title.isNotEmpty || content.isNotEmpty) {
+    //TODO redo the validation
+    if (title.isNotEmpty) {
       return right(unit);
     } else {
       return left(ValueFailure.notValidToSaveInDatabase());
@@ -22,14 +28,26 @@ class Note {
   }
 
   factory Note.fromMap(Map<String, dynamic> inMap) {
-    return Note.set(
-      inMap["id"],
-      inMap["title"],
-      inMap["content"],
-      inMap["color"],
-      inMap["dateCreated"] as int?,
-      inMap["dateEdited"] as int,
+    return Note(
+      id:inMap["id"],
+      title:inMap["title"],
+      content:inMap["content"],
+      color:inMap["color"],
+      dateCreated: inMap["dateCreated"] as int,
+      dateEdited: inMap["dateEdited"] as int,
     );
+  }
+
+  Note updateData({
+    String? title,
+    String? content,
+    String? color,
+    int? dateEdited}){
+    this.title = title ?? this.title;
+    this.content = content ?? this.content;
+    this.color = color ?? this.color;
+    this.dateEdited = dateEdited ?? this.dateEdited;
+    return this;
   }
 
   Map<String, dynamic> toMap() {
@@ -56,6 +74,17 @@ class Note {
       "dateEdited": $dateEdited,
     }
     ''';
+  }
+
+  @override
+  int compareTo(Note other) {
+    if (dateEdited < other.dateEdited) {
+      return -1;
+    } else if (dateEdited > other.dateEdited) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 }
 

@@ -118,17 +118,18 @@ class _GroupTaskTileState extends State<GroupTaskTile> {
       context: context,
       builder: (context) {
         return Container(
+          width: Get.width,
           padding: EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Delete Task',
+                'Delete Group',
                 style: Get.textTheme.headlineMedium,
               ),
               SizedBox(height: 16),
               Text(
-                'Are you sure you want to delete this Group?',
+                widget.groupTask.title,
                 style: Get.textTheme.titleMedium,
               ),
               SizedBox(height: 16),

@@ -1,25 +1,47 @@
-class Reminder {
+import 'package:dartz/dartz.dart';
+
+import '../../../core/domain/failures.dart';
+
+class Reminder implements Comparable<Reminder> {
   int? id;
   String title = '';
   String description = '';
-  int? date;
-  int? time;
-  String? color;
-  int? duration;
-  int? dateCreated;
+  int date;
+  int time;
+  String color;
+  int duration;
+  int dateCreated;
   int dateEdited;
 
   Reminder({
     this.id,
     required this.title,
     required this.description,
-    this.date,
-    this.time,
-    this.color,
-    this.duration,
-    this.dateCreated,
+    required this.date,
+    required this.time,
+    required this.color,
+    required this.duration,
+    required this.dateCreated,
     required this.dateEdited,
   });
+
+  Reminder updateData({
+  String? title,
+  String? description,
+  int? date,
+  int? time,
+  String? color,
+  int? duration,
+  int? dateEdited,}){
+    this.title = title ?? this.title;
+    this.description = description ?? this.description;
+    this.date = date ?? this.date;
+    this.time = time ?? this.time;
+    this.color = color ?? this.color;
+    this.duration = duration ?? this.duration;
+    this.dateEdited = dateEdited ?? this.dateEdited;
+    return this;
+  }
 
   Reminder._set(
     this.id,
@@ -59,5 +81,25 @@ class Reminder {
       "dateCreated": reminder.dateCreated,
       "dateEdited": reminder.dateEdited,
     };
+  }
+
+  Either<ValueFailure, Unit> isValid() {
+    //TODO redo the validation
+    if (title.isNotEmpty || description.isNotEmpty) {
+      return right(unit);
+    } else {
+      return left(ValueFailure.notValidToSaveInDatabase());
+    }
+  }
+
+  @override
+  int compareTo(Reminder other) {
+    if (dateEdited < other.dateEdited) {
+      return -1;
+    } else if (dateEdited > other.dateEdited) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 }

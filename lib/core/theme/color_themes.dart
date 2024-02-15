@@ -1,31 +1,6 @@
 import 'package:flutter/material.dart';
 
 class ColorThemes {
-  static const MaterialColor primarySwatch = MaterialColor(
-    0xFF1976D2,
-    <int, Color>{
-      50: Color(0xFFE3F2FD),
-      100: Color(0xFFBBDEFB),
-      200: Color(0xFF90CAF9),
-      300: Color(0xFF64B5F6),
-      400: Color(0xFF42A5F5),
-      500: Color(0xFF2196F3),
-      600: Color(0xFF1E88E5),
-      700: Color(0xFF1976D2),
-      800: Color(0xFF1565C0),
-      900: Color(0xFF0D47A1),
-    },
-  );
-
-  static const MaterialAccentColor accentColor = MaterialAccentColor(
-    0xFFEF6C00,
-    <int, Color>{
-      100: Color(0xFFFFECB3),
-      200: Color(0xFFFFD54F),
-      400: Color(0xFFFFC107),
-      700: Color(0xFFFFA000),
-    },
-  );
 
 
   static const ColorScheme lightColorScheme = ColorScheme(
@@ -90,9 +65,37 @@ class ColorThemes {
     onInverseSurface: Color(0xFF1F1B16),
     inverseSurface: Color(0xFFEAE1D9),
     inversePrimary: Color(0xFF825500),
-    shadow: Color(0xFF000000),
+    shadow: Color(0xFFCBCBCB),
     surfaceTint: Color(0xFFFFB951),
     outlineVariant: Color(0xFF4F4539),
     scrim: Color(0xFF000000),
   );
 }
+
+
+//  const MaterialColor primarySwatch = MaterialColor(
+//   0xFF1976D2,
+//   <int, Color>{
+//     50: Color(0xFFE3F2FD),
+//     100: Color(0xFFBBDEFB),
+//     200: Color(0xFF90CAF9),
+//     300: Color(0xFF64B5F6),
+//     400: Color(0xFF42A5F5),
+//     500: Color(0xFF2196F3),
+//     600: Color(0xFF1E88E5),
+//     700: Color(0xFF1976D2),
+//     800: Color(0xFF1565C0),
+//     900: Color(0xFF0D47A1),
+//   },
+// );
+//
+//  const MaterialAccentColor accentColor = MaterialAccentColor(
+//   0xFFEF6C00,
+//   <int, Color>{
+//     100: Color(0xFFFFECB3),
+//     200: Color(0xFFFFD54F),
+//     400: Color(0xFFFFC107),
+//     700: Color(0xFFFFA000),
+//   },
+// );
+//
